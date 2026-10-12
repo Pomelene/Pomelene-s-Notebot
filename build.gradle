@@ -1,0 +1,85 @@
+plugins {
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+version = project.mod_version
+group = project.maven_group
+base { archivesName = 'pomelene-notebot' }
+
+repositories { mavenCentral() }
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+    implementation 'com.atilika.kuromoji:kuromoji-core:0.9.0'
+    implementation 'com.atilika.kuromoji:kuromoji-ipadic:0.9.0'
+    include 'com.atilika.kuromoji:kuromoji-core:0.9.0'
+    include 'com.atilika.kuromoji:kuromoji-ipadic:0.9.0'
+    testImplementation platform('org.junit:junit-bom:5.14.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+processResources {
+    inputs.property 'version', project.version
+    filesMatching('fabric.mod.json') { expand version: project.version }
+}
+tasks.withType(JavaCompile).configureEach {
+    options.release = 25
+    options.encoding = 'UTF-8'
+}
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+test { useJUnitPlatform() }
+if(project.hasProperty('notebotNbs6Fixture')) {
+    test { systemProperty 'notebot.test.nbs6', project.property('notebotNbs6Fixture') }
+}
+if(project.hasProperty('notebotUiSmoke')) {
+    tasks.withType(ProcessResources).configureEach {
+        if(name=='processGametestResources') {
+            filesMatching('fabric.mod.json') {
+                filter { line -> line.replace('com.pomelene.notebot.NotebotGameTest','com.pomelene.notebot.NotebotUiSmokeTest') }
+            }
+        }
+    }
+}
+jar { from('LICENSE') { rename { "${it}_pomelene-notebot" } } }
+
+fabricApi {
+    configureTests {
+        createSourceSet = true
+        modId = 'pomelene_notebot_test'
+        enableGameTests = false
+        enableClientGameTests = true
+        clearRunDirectory = false
+    }
+}
+
+// Optional user-supplied regression fixtures stay outside source/release archives.
+if (project.hasProperty('notebotStageFixture')) {
+    loom.runs.clientGameTest.vmArg "-Dnotebot.test.stage=${project.property('notebotStageFixture')}"
+}
+if (project.hasProperty('notebotSongFixture')) {
+    loom.runs.clientGameTest.vmArg "-Dnotebot.test.song=${project.property('notebotSongFixture')}"
+}
+if (project.hasProperty('notebotLibraryFixture')) {
+    loom.runs.clientGameTest.vmArg "-Dnotebot.test.library=${project.property('notebotLibraryFixture')}"
+}
+
+if(project.hasProperty('notebotDetectionTest')) {
+    tasks.withType(ProcessResources).configureEach {
+        if(name=='processGametestResources') {
+            filesMatching('fabric.mod.json') {
+                filter { line -> line.replace('com.pomelene.notebot.NotebotGameTest','com.pomelene.notebot.NotebotDetectionTest') }
+            }
+        }
+    }
+}
+
+// Test entrypoint changes are resource inputs, so switching suites invalidates cached resources.
+tasks.withType(ProcessResources).configureEach {
+    inputs.property 'notebotTestMode', project.hasProperty('notebotDetectionTest') ? 'detection' : project.hasProperty('notebotUiSmoke') ? 'ui' : 'gameplay'
+}

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "pomelene_notebot_test",
+  "version": "1.0.0",
+  "name": "Notebot Integration Tests",
+  "environment": "client",
+  "entrypoints": {
+    "fabric-client-gametest": ["com.pomelene.notebot.NotebotGameTest"]
+  },
+  "mixins": ["notebot-test.mixins.json"],
+  "depends": { "pomelene_notebot": "*", "fabric-client-gametest-api-v1": "*" }
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "pomelene_notebot",
+  "version": "${version}",
+  "name": "Pomelene Notebot",
+  "description": "Load NBS songs, check nearby note blocks, and play with a hotkey.",
+  "authors": ["Pomelene"],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": { "client": ["com.pomelene.notebot.NotebotClient"] },
+  "mixins": ["pomelene_notebot.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "26.3",
+    "java": ">=25",
+    "fabric-api": ">=0.161.0"
+  }
+}
