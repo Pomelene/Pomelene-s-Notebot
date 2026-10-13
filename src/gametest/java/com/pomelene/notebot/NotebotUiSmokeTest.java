@@ -12,46 +12,46 @@ public final class NotebotUiSmokeTest implements FabricClientGameTest {
         context.runOnClient(mc -> {mc.options.guiScale().set(2);mc.getWindow().setWindowed(854,480);});
         context.waitTicks(8);
         for(var tab:NotebotScreen.Tab.values()) {
-            context.runOnClient(mc -> {var screen=new NotebotScreen(NotebotClient.controller());mc.gui.setScreen(screen);screen.selectTab(tab);});
-            context.waitTicks(8);context.runOnClient(mc -> check(mc.gui.screen()));
+            context.runOnClient(mc -> {var screen=new NotebotScreen(NotebotClient.controller());MinecraftPlatform.setScreen(mc,screen);screen.selectTab(tab);});
+            context.waitTicks(8);context.runOnClient(mc -> check(MinecraftPlatform.screen(mc)));
             context.takeScreenshot("rebuild-small-"+tab.name().toLowerCase(Locale.ROOT));
         }
-        context.runOnClient(mc -> {var screen=new NotebotScreen(NotebotClient.controller());mc.gui.setScreen(screen);
+        context.runOnClient(mc -> {var screen=new NotebotScreen(NotebotClient.controller());MinecraftPlatform.setScreen(mc,screen);
             var input=(EditBox)screen.children().stream().filter(c -> c instanceof EditBox).findFirst().orElseThrow();input.setValue("senbonzakura");});
         context.waitTicks(15);
         context.runOnClient(mc -> mc.getWindow().setWindowed(1200,800));context.waitTicks(10);
-        context.runOnClient(mc -> check(mc.gui.screen()));context.takeScreenshot("rebuild-large-search");
-        context.runOnClient(mc -> mc.gui.setScreen(new FolderScreen(mc.gui.screen(),NotebotClient.controller())));
-        context.waitTicks(3);context.runOnClient(mc -> {check(mc.gui.screen());mc.gui.screen().onClose();});
-        context.waitTicks(3);context.runOnClient(mc -> check(mc.gui.screen()));
+        context.runOnClient(mc -> check(MinecraftPlatform.screen(mc)));context.takeScreenshot("rebuild-large-search");
+        context.runOnClient(mc -> MinecraftPlatform.setScreen(mc,new FolderScreen(MinecraftPlatform.screen(mc),NotebotClient.controller())));
+        context.waitTicks(3);context.runOnClient(mc -> {check(MinecraftPlatform.screen(mc));MinecraftPlatform.screen(mc).onClose();});
+        context.waitTicks(3);context.runOnClient(mc -> check(MinecraftPlatform.screen(mc)));
         context.runOnClient(mc -> NotebotClient.controller().load(NotebotClient.controller().directory().resolve("notebot-demo.nbs")));
         context.waitFor(mc -> NotebotClient.controller().song()!=null,200);
         context.runOnClient(mc -> {
             var parent=new NotebotScreen(NotebotClient.controller());
             var compatibility=new CompatibilityScreen(parent,NotebotClient.controller());
-            mc.gui.setScreen(compatibility);mc.gui.setScreen(new PreferenceScreen(compatibility));
+            MinecraftPlatform.setScreen(mc,compatibility);MinecraftPlatform.setScreen(mc,new PreferenceScreen(compatibility));
         });
-        context.waitTicks(3);context.runOnClient(mc -> check(mc.gui.screen()));context.takeScreenshot("rebuild-preferences");
+        context.waitTicks(3);context.runOnClient(mc -> check(MinecraftPlatform.screen(mc)));context.takeScreenshot("rebuild-preferences");
         context.runOnClient(mc -> {
-            mc.gui.setScreen(new NotebotScreen(NotebotClient.controller()));
-            var button=mc.gui.screen().children().stream().filter(c -> c instanceof net.minecraft.client.gui.components.Button b
+            MinecraftPlatform.setScreen(mc,new NotebotScreen(NotebotClient.controller()));
+            var button=MinecraftPlatform.screen(mc).children().stream().filter(c -> c instanceof net.minecraft.client.gui.components.Button b
                     && b.getMessage().getString().equals(NotebotController.text("open_folder").getString()))
                     .map(c -> (net.minecraft.client.gui.components.Button)c).findFirst().orElseThrow();
             var event=new net.minecraft.client.input.MouseButtonEvent(button.getX()+button.getWidth()/2.0,
                     button.getY()+button.getHeight()/2.0,new net.minecraft.client.input.MouseButtonInfo(
                     com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT,0));
-            mc.gui.screen().mouseClicked(event,false);mc.gui.screen().mouseReleased(event);
+            MinecraftPlatform.screen(mc).mouseClicked(event,false);MinecraftPlatform.screen(mc).mouseReleased(event);
         });
         context.waitFor(mc -> NotebotClient.controller().folderMessage().getString().equals(NotebotController.text("folder_requested").getString()),160);
-        context.waitTicks(10);context.runOnClient(mc -> check(mc.gui.screen()));
+        context.waitTicks(10);context.runOnClient(mc -> check(MinecraftPlatform.screen(mc)));
         System.out.println("FOLDER_OPEN_UI_OK: click returned, file manager requested, client ticks continued");
         var reload=context.computeOnClient(mc -> {mc.options.languageCode="zh_cn";mc.getLanguageManager().setSelected("zh_cn");return mc.reloadResourcePacks();});
-        context.waitFor(mc -> reload.isDone()&&mc.gui.overlay()==null,300);
-        context.runOnClient(mc -> {mc.getWindow().setWindowed(854,480);mc.gui.setScreen(new NotebotScreen(NotebotClient.controller()));});
-        context.waitTicks(8);context.runOnClient(mc -> check(mc.gui.screen()));context.takeScreenshot("rebuild-chinese-library");
-        context.runOnClient(mc -> {((NotebotScreen)mc.gui.screen()).selectTab(NotebotScreen.Tab.PLAYBACK);});
+        context.waitFor(mc -> reload.isDone()&&MinecraftPlatform.overlay(mc)==null,300);
+        context.runOnClient(mc -> {mc.getWindow().setWindowed(854,480);MinecraftPlatform.setScreen(mc,new NotebotScreen(NotebotClient.controller()));});
+        context.waitTicks(8);context.runOnClient(mc -> check(MinecraftPlatform.screen(mc)));context.takeScreenshot("rebuild-chinese-library");
+        context.runOnClient(mc -> {((NotebotScreen)MinecraftPlatform.screen(mc)).selectTab(NotebotScreen.Tab.PLAYBACK);});
         context.waitTicks(3);context.takeScreenshot("rebuild-chinese-playback");
-        context.runOnClient(mc -> {((NotebotScreen)mc.gui.screen()).selectTab(NotebotScreen.Tab.SETTINGS);check(mc.gui.screen());});
+        context.runOnClient(mc -> {((NotebotScreen)MinecraftPlatform.screen(mc)).selectTab(NotebotScreen.Tab.SETTINGS);check(MinecraftPlatform.screen(mc));});
         context.waitTicks(3);context.takeScreenshot("columns-chinese-settings");
         if(System.getProperty("notebot.test.song")!=null) {
             context.runOnClient(mc -> NotebotClient.controller().load(java.nio.file.Path.of(System.getProperty("notebot.test.song"))));
@@ -64,7 +64,7 @@ public final class NotebotUiSmokeTest implements FabricClientGameTest {
             context.waitTicks(3);context.takeScreenshot("nbs6-petal-dance-compatibility");
             System.out.println("NBS6_CLIENT_LOADED: Petal Dance, 8976 audible notes, native copper and custom Firework");
         }
-        context.runOnClient(mc -> mc.gui.setScreen(null));
+        context.runOnClient(mc -> MinecraftPlatform.setScreen(mc,null));
         System.out.println("REBUILD_UI_OK: tabs, resize, search, return, preferences, Chinese");
     }
     static void check(net.minecraft.client.gui.screens.Screen screen) {

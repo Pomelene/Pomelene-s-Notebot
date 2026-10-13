@@ -2,15 +2,32 @@ plugins {
     id 'net.fabricmc.fabric-loom' version "${loom_version}"
 }
 
-version = project.mod_version
+def compatibility = new groovy.json.JsonSlurper().parse(file('compatibility.json'))
+def targetMinecraft = providers.gradleProperty('mcVersion').getOrElse(project.minecraft_version)
+def target = compatibility.targets[targetMinecraft]
+if (target == null) throw new GradleException("Unsupported Minecraft target: ${targetMinecraft}; choose ${compatibility.targets.keySet()}")
+def profile = providers.gradleProperty('fabricProfile').getOrElse('baseline')
+if (!(profile in ['baseline', 'latest'])) throw new GradleException('fabricProfile must be baseline or latest')
+def runtimeLoader = providers.gradleProperty('loaderVersion').getOrElse(profile == 'latest' ? compatibility.latestLoader : target.minLoader)
+def runtimeApi = providers.gradleProperty('fabricApiVersion').getOrElse(profile == 'latest' ? target.latestApi : target.minApi)
+def testMode = providers.gradleProperty('notebotTestSuite').getOrElse(project.hasProperty('notebotDetectionTest') ? 'detection' : project.hasProperty('notebotUiSmoke') ? 'ui' : 'gameplay')
+def testClasses = [gameplay: 'NotebotGameTest', detection: 'NotebotDetectionTest', ui: 'NotebotUiSmokeTest', matrix: 'NotebotMatrixTest']
+if (!testClasses.containsKey(testMode)) throw new GradleException("Unknown test suite: ${testMode}")
+
+version = "${project.mod_version}+${targetMinecraft}"
 group = project.maven_group
 base { archivesName = 'pomelene-notebot' }
+// Keep outputs from different versions and runtime environments isolated.
+layout.buildDirectory = file("build/${targetMinecraft}/${profile}")
+sourceSets.main.java.srcDir("src/platform/${target.adapter}/java")
 
 repositories { mavenCentral() }
 dependencies {
-    minecraft "com.mojang:minecraft:${minecraft_version}"
-    implementation "net.fabricmc:fabric-loader:${loader_version}"
-    implementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+    minecraft "com.mojang:minecraft:${targetMinecraft}"
+    // Loom derives Mixin/ASM bootstrap libraries from this dependency.
+    implementation "net.fabricmc:fabric-loader:${runtimeLoader}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${target.minApi}"
+    runtimeOnly "net.fabricmc.fabric-api:fabric-api:${runtimeApi}"
     implementation 'com.atilika.kuromoji:kuromoji-core:0.9.0'
     implementation 'com.atilika.kuromoji:kuromoji-ipadic:0.9.0'
     include 'com.atilika.kuromoji:kuromoji-core:0.9.0'
@@ -21,8 +38,8 @@ dependencies {
 }
 
 processResources {
-    inputs.property 'version', project.version
-    filesMatching('fabric.mod.json') { expand version: project.version }
+    inputs.properties(version: project.version, minecraft: targetMinecraft, minLoader: target.minLoader, minApi: target.minApi.split('\\+')[0])
+    filesMatching('fabric.mod.json') { expand inputs.properties }
 }
 tasks.withType(JavaCompile).configureEach {
     options.release = 25
@@ -36,15 +53,6 @@ java {
 test { useJUnitPlatform() }
 if(project.hasProperty('notebotNbs6Fixture')) {
     test { systemProperty 'notebot.test.nbs6', project.property('notebotNbs6Fixture') }
-}
-if(project.hasProperty('notebotUiSmoke')) {
-    tasks.withType(ProcessResources).configureEach {
-        if(name=='processGametestResources') {
-            filesMatching('fabric.mod.json') {
-                filter { line -> line.replace('com.pomelene.notebot.NotebotGameTest','com.pomelene.notebot.NotebotUiSmokeTest') }
-            }
-        }
-    }
 }
 jar { from('LICENSE') { rename { "${it}_pomelene-notebot" } } }
 
@@ -69,17 +77,26 @@ if (project.hasProperty('notebotLibraryFixture')) {
     loom.runs.clientGameTest.vmArg "-Dnotebot.test.library=${project.property('notebotLibraryFixture')}"
 }
 
-if(project.hasProperty('notebotDetectionTest')) {
-    tasks.withType(ProcessResources).configureEach {
-        if(name=='processGametestResources') {
-            filesMatching('fabric.mod.json') {
-                filter { line -> line.replace('com.pomelene.notebot.NotebotGameTest','com.pomelene.notebot.NotebotDetectionTest') }
-            }
+tasks.withType(ProcessResources).configureEach {
+    inputs.property 'notebotTestMode', testMode
+    if (name == 'processGametestResources') {
+        filesMatching('fabric.mod.json') {
+            filter { line -> line.replace('com.pomelene.notebot.NotebotGameTest', "com.pomelene.notebot.${testClasses[testMode]}") }
         }
     }
 }
 
-// Test entrypoint changes are resource inputs, so switching suites invalidates cached resources.
-tasks.withType(ProcessResources).configureEach {
-    inputs.property 'notebotTestMode', project.hasProperty('notebotDetectionTest') ? 'detection' : project.hasProperty('notebotUiSmoke') ? 'ui' : 'gameplay'
+tasks.register('showCompatibility') {
+    doLast { println "Minecraft ${targetMinecraft}; compile Loader ${runtimeLoader}, API ${target.minApi}; runtime Loader ${runtimeLoader}, API ${runtimeApi}; suite ${testMode}" }
+}
+
+// The same game target produces identical artifacts for both Fabric runtime profiles.
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+// Fabric's test plugin otherwise reuses build/run/clientGameTest across all targets.
+loom.runs.configureEach {
+    runDir("build/${targetMinecraft}/${profile}/run/${name}")
 }

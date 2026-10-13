@@ -14,7 +14,7 @@ public final class NotebotGameTest implements FabricClientGameTest {
     private static void require(boolean condition, String message) { if (!condition) throw new AssertionError(message); }
     @Override public void runTest(ClientGameTestContext context) {
         try (var world = context.worldBuilder().create()) {
-            var server = world.getServer(); var connection = world.getConnection();
+            var server = world.getServer(); var connection = new TestConnection(context, world);
             connection.waitForChunksDownload();
             server.runCommand("fill -4 4 -4 4 4 4 minecraft:dirt");
             server.runCommand("fill -4 5 -4 4 8 4 minecraft:air");
@@ -59,15 +59,15 @@ public final class NotebotGameTest implements FabricClientGameTest {
             context.getInput().pressKey(KeyMapping.get("key.notebot.menu"));
             context.waitForScreen(NotebotScreen.class);
             context.waitTicks(3);
-            context.runOnClient(mc -> clickRadius(mc.gui.screen(), "−"));
+            context.runOnClient(mc -> clickRadius(MinecraftPlatform.screen(mc), "−"));
             require(context.computeOnClient(mc -> NotebotClient.controller().scanRadius()) == 5.5,
                     "GUI radius slider must reduce radius by half a block");
             context.waitTicks(1);
-            context.runOnClient(mc -> clickRadius(mc.gui.screen(), "+"));
+            context.runOnClient(mc -> clickRadius(MinecraftPlatform.screen(mc), "+"));
             require(context.computeOnClient(mc -> NotebotClient.controller().scanRadius()) == 6.0,
                     "GUI radius slider must increase radius by half a block");
             context.waitTicks(2); context.takeScreenshot("notebot-library");
-            context.runOnClient(mc -> mc.gui.setScreen(null));
+            context.runOnClient(mc -> MinecraftPlatform.setScreen(mc,null));
             TestNoteEvents.received.set(0);
             context.getInput().pressKey(KeyMapping.get("key.notebot.play"));
             context.waitFor(mc -> NotebotClient.controller().state() == NotebotController.State.PLAYING, 30);
@@ -140,11 +140,11 @@ public final class NotebotGameTest implements FabricClientGameTest {
             context.runOnClient(mc -> {
                 var bot = NotebotClient.controller(); bot.scan();
                 require(bot.report().missing().size() == 1, "Wrong instrument must not match harp pitch");
-                mc.gui.setScreen(new ReportScreen(new NotebotScreen(bot), bot));
+                MinecraftPlatform.setScreen(mc,new ReportScreen(new NotebotScreen(bot), bot));
             });
             context.waitTicks(3); context.takeScreenshot("notebot-missing-instrument");
             server.runCommand("setblock -2 4 -2 minecraft:dirt");
-            context.runOnClient(mc -> mc.gui.setScreen(null));
+            context.runOnClient(mc -> MinecraftPlatform.setScreen(mc,null));
             server.runCommand("tp @a 20.5 5 0.5");
             connection.waitForClientboundPackets();
             context.runOnClient(mc -> {
@@ -157,7 +157,7 @@ public final class NotebotGameTest implements FabricClientGameTest {
             context.runOnClient(mc -> {
                 NotebotClient.controller().togglePlayback();
                 require(NotebotClient.controller().state() != NotebotController.State.PLAYING, "Creative must be refused");
-                mc.gui.setScreen(new NotebotScreen(NotebotClient.controller()));
+                MinecraftPlatform.setScreen(mc,new NotebotScreen(NotebotClient.controller()));
             });
             context.waitTicks(3); context.takeScreenshot("notebot-report");
             var languageReload = context.computeOnClient(mc -> {
@@ -167,9 +167,9 @@ public final class NotebotGameTest implements FabricClientGameTest {
             });
             context.waitFor(mc -> languageReload.isDone(), 300);
             languageReload.join();
-            context.waitFor(mc -> mc.gui.overlay() == null, 100);
+            context.waitFor(mc -> MinecraftPlatform.overlay(mc) == null, 100);
             context.waitTicks(5); context.takeScreenshot("notebot-chinese");
-            context.runOnClient(mc -> { mc.gui.setScreen(null); NotebotClient.controller().stop(false); });
+            context.runOnClient(mc -> { MinecraftPlatform.setScreen(mc,null); NotebotClient.controller().stop(false); });
         }
         testExtendedRange(context);
         if (System.getProperty("notebot.test.library") != null) testLegacyLibrary(context);
@@ -178,7 +178,7 @@ public final class NotebotGameTest implements FabricClientGameTest {
 
     private void testExtendedRange(ClientGameTestContext context) {
         try (var world = context.worldBuilder().create()) {
-            var server = world.getServer(); var connection = world.getConnection();
+            var server = world.getServer(); var connection = new TestConnection(context, world);
             connection.waitForChunksDownload();
             server.runCommand("fill -4 4 -4 4 4 4 minecraft:dirt");
             server.runCommand("fill 60 4 -1 65 4 1 minecraft:dirt");
@@ -203,15 +203,15 @@ public final class NotebotGameTest implements FabricClientGameTest {
                         "64-block scan must include x=64 and exclude x=65");
                 require(bot.report().outOfRange() >= 1, "Outside radius must be reported");
                 require(new NotebotController(mc).scanRadius() == 64.0, "64-block setting must persist");
-                mc.gui.setScreen(new NotebotScreen(bot));
+                MinecraftPlatform.setScreen(mc,new NotebotScreen(bot));
                 bot.setScanRadius(63.5);
             });
             context.waitTicks(2);
-            context.runOnClient(mc -> clickRadius(mc.gui.screen(), "+"));
+            context.runOnClient(mc -> clickRadius(MinecraftPlatform.screen(mc), "+"));
             require(context.computeOnClient(mc -> NotebotClient.controller().scanRadius()) == 64.0,
                     "GUI must reach 64 blocks");
             context.waitTicks(2); context.takeScreenshot("notebot-radius64");
-            context.runOnClient(mc -> mc.gui.setScreen(null));
+            context.runOnClient(mc -> MinecraftPlatform.setScreen(mc,null));
             server.runCommand("setblock 62 5 0 minecraft:note_block[note=0]");
             connection.waitForClientboundPackets();
             context.runOnClient(mc -> { var bot = NotebotClient.controller(); bot.scan(); bot.tune(); });
@@ -258,7 +258,7 @@ public final class NotebotGameTest implements FabricClientGameTest {
 
     private void testMusicStage(ClientGameTestContext context) {
         try (var world = context.worldBuilder().create()) {
-            var server = world.getServer(); var connection = world.getConnection();
+            var server = world.getServer(); var connection = new TestConnection(context, world);
             connection.waitForChunksDownload();
             com.google.gson.JsonObject fixture;
             try (var reader = java.nio.file.Files.newBufferedReader(java.nio.file.Path.of(System.getProperty("notebot.test.stage")))) {
@@ -322,9 +322,9 @@ public final class NotebotGameTest implements FabricClientGameTest {
                     if (connection.getServerLevel().getBlockState(pos).is(Blocks.NOTE_BLOCK)) noteCount++;
                 require(noteCount == 388, "Music stage must retain all 388 note blocks after tuning and playback");
             });
-            context.runOnClient(mc -> mc.gui.setScreen(new NotebotScreen(NotebotClient.controller())));
+            context.runOnClient(mc -> MinecraftPlatform.setScreen(mc,new NotebotScreen(NotebotClient.controller())));
             context.waitTicks(5); context.takeScreenshot("notebot-actual-music-stage");
-            context.runOnClient(mc -> mc.gui.setScreen(null));
+            context.runOnClient(mc -> MinecraftPlatform.setScreen(mc,null));
         }
     }
 

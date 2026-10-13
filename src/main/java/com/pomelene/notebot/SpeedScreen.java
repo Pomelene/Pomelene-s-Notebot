@@ -21,7 +21,7 @@ public final class SpeedScreen extends Screen {
         input=addRenderableWidget(new EditBox(font,left,85,240,20,NotebotController.text("custom_tempo")));
         input.setMaxLength(10);input.setValue(Double.toString(controller.customTempo()));
         apply=addRenderableWidget(Button.builder(NotebotController.text("speed_apply"),b -> {
-            controller.setCustomTempo(Double.parseDouble(input.getValue().trim()));minecraft.gui.setScreen(parent);
+            controller.setCustomTempo(Double.parseDouble(input.getValue().trim()));MinecraftPlatform.setScreen(minecraft,parent);
         }).bounds(left,height-50,118,20).build());
         input.setResponder(v -> {
             boolean valid;
@@ -40,5 +40,5 @@ public final class SpeedScreen extends Screen {
         g.textWithWordWrap(font,NotebotController.text("speed_hint"),width/2-120,115,240,0xFFDDDDDD);
     }
     @Override public boolean isPauseScreen() {return false;}
-    @Override public void onClose() {minecraft.gui.setScreen(parent);}
+    @Override public void onClose() {MinecraftPlatform.setScreen(minecraft,parent);}
 }

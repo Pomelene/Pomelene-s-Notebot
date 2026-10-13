@@ -23,10 +23,10 @@ public final class NotebotClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
             while (stop.consumeClick()) controller.stop(true);
             while (menu.consumeClick()) {
-                if (mc.gui.screen() == null) mc.gui.setScreen(new NotebotScreen(controller));
+                if (MinecraftPlatform.screen(mc) == null) MinecraftPlatform.setScreen(mc,new NotebotScreen(controller));
             }
             while (play.consumeClick()) {
-                if (mc.gui.screen() == null || controller.directPackets()) controller.togglePlayback();
+                if (MinecraftPlatform.screen(mc) == null || controller.directPackets()) controller.togglePlayback();
             }
             controller.tick();
             controller.highlights().tick(mc,controller.report());
@@ -34,6 +34,6 @@ public final class NotebotClient implements ClientModInitializer {
     }
     private static KeyMapping key(String name, int code, KeyMapping.Category category) {
         return KeyMappingHelper.registerKeyMapping(new KeyMapping("key.notebot." + name,
-                InputConstants.Type.KEYBOARD, code, category));
+                MinecraftPlatform.keyboardType(), code, category));
     }
 }

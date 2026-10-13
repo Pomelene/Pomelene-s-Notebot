@@ -1,0 +1,186 @@
+{
+  "checkedAt": "2026-10-13T06:20:29.199488+00:00",
+  "results": [
+    {
+      "minecraft": "26.1",
+      "profile": "baseline",
+      "loader": "0.18.4",
+      "fabricApi": "0.144.4+26.1",
+      "passed": true,
+      "clientVerified": true,
+      "seconds": 90.5,
+      "log": "build/matrix-logs/26.1-baseline.log",
+      "logSha256": "133b7d114b3ce2d17a098e6aefd5d8ca8d676eb49f1987eba934162e9ceeefa0",
+      "unitTests": {
+        "tests": 48,
+        "skipped": 1,
+        "failures": 0,
+        "errors": 0
+      },
+      "artifactSha256": "8654f6338e615075de88e2944b1cba00d4b01f5ed66d6c6fde967c25c8ecb2e6"
+    },
+    {
+      "minecraft": "26.1",
+      "profile": "latest",
+      "loader": "0.19.5",
+      "fabricApi": "0.145.1+26.1",
+      "passed": true,
+      "clientVerified": true,
+      "seconds": 125.0,
+      "log": "build/matrix-logs/26.1-latest.log",
+      "logSha256": "9a238a73004f019264aa229b7c4547bce3753d69830e78b3a3e7d817c162dd62",
+      "unitTests": {
+        "tests": 48,
+        "skipped": 1,
+        "failures": 0,
+        "errors": 0
+      },
+      "artifactSha256": "399e47a5f87abcd6a747618613d1d94152d40f6256918ac6fa65925ac04c2f77"
+    },
+    {
+      "minecraft": "26.1.1",
+      "profile": "baseline",
+      "loader": "0.18.4",
+      "fabricApi": "0.145.2+26.1.1",
+      "passed": true,
+      "clientVerified": true,
+      "seconds": 113.9,
+      "log": "build/matrix-logs/26.1.1-baseline.log",
+      "logSha256": "91454a7f7dd5c95375d962d63f7fcea93d50b1ec2ee3c244d747529fc2ef5c95",
+      "unitTests": {
+        "tests": 48,
+        "skipped": 1,
+        "failures": 0,
+        "errors": 0
+      },
+      "artifactSha256": "185ae26d4d3891e4d0d47e9111384e14de8f2d413dfb107d1dfb14a74171832d"
+    },
+    {
+      "minecraft": "26.1.1",
+      "profile": "latest",
+      "loader": "0.19.5",
+      "fabricApi": "0.145.4+26.1.1",
+      "passed": true,
+      "clientVerified": true,
+      "seconds": 97.9,
+      "log": "build/matrix-logs/26.1.1-latest.log",
+      "logSha256": "2679b085db48bd0320883fed34f5bc6e0529db41b415bcd04fbb5dac9acd1f4b",
+      "unitTests": {
+        "tests": 48,
+        "skipped": 1,
+        "failures": 0,
+        "errors": 0
+      },
+      "artifactSha256": "3a3686224dcee034cf8305450f5db9887876d41c5bfe0f574b5839a9142fe8da"
+    },
+    {
+      "minecraft": "26.1.2",
+      "profile": "baseline",
+      "loader": "0.18.4",
+      "fabricApi": "0.145.4+26.1.2",
+      "passed": true,
+      "clientVerified": true,
+      "seconds": 93.1,
+      "log": "build/matrix-logs/26.1.2-baseline.log",
+      "logSha256": "d03832e9f2223a54727adf654294df2bb3642538520126d2b57fd613d8273498",
+      "unitTests": {
+        "tests": 48,
+        "skipped": 1,
+        "failures": 0,
+        "errors": 0
+      },
+      "artifactSha256": "4205a15c601113b5f8033f4842790065ae8136f3ddec0704ea7ddeffdd024bb7"
+    },
+    {
+      "minecraft": "26.1.2",
+      "profile": "latest",
+      "loader": "0.19.5",
+      "fabricApi": "0.155.3+26.1.2",
+      "passed": true,
+      "clientVerified": true,
+      "seconds": 99.4,
+      "log": "build/matrix-logs/26.1.2-latest.log",
+      "logSha256": "25c30113c9e8a325b0f8ef04a75c94bf21b3d5dbb00aa518bc8585ed415bbd9d",
+      "unitTests": {
+        "tests": 48,
+        "skipped": 1,
+        "failures": 0,
+        "errors": 0
+      },
+      "artifactSha256": "85f75956f383d171707fd9f1d6fdeead0c7b62c5b9eebd484ce0a544f85174b0"
+    },
+    {
+      "minecraft": "26.2",
+      "profile": "baseline",
+      "loader": "0.19.3",
+      "fabricApi": "0.153.0+26.2",
+      "passed": true,
+      "clientVerified": true,
+      "seconds": 91.7,
+      "log": "build/matrix-logs/26.2-baseline.log",
+      "logSha256": "6cd8de3edec52e5fa5affa5a5de77c3b145cb76902ea6d4d4ae9e65610eeb9a7",
+      "unitTests": {
+        "tests": 48,
+        "skipped": 1,
+        "failures": 0,
+        "errors": 0
+      },
+      "artifactSha256": "94d954b96f0b0144cb81952e135f203fb8e779ede037bbd8d4c50db92f027836"
+    },
+    {
+      "minecraft": "26.2",
+      "profile": "latest",
+      "loader": "0.19.5",
+      "fabricApi": "0.161.0+26.2",
+      "passed": true,
+      "clientVerified": true,
+      "seconds": 93.4,
+      "log": "build/matrix-logs/26.2-latest.log",
+      "logSha256": "dc337f031ee3787a41b40279d5a5d8526a4c9e81852af0ceb830328742fffa15",
+      "unitTests": {
+        "tests": 48,
+        "skipped": 1,
+        "failures": 0,
+        "errors": 0
+      },
+      "artifactSha256": "a88bd5315bbcb7902d26171cea68b1ea9ddfbab64eef0d329eded7682d849fe0"
+    },
+    {
+      "minecraft": "26.3",
+      "profile": "baseline",
+      "loader": "0.19.3",
+      "fabricApi": "0.161.0+26.3",
+      "passed": true,
+      "clientVerified": true,
+      "seconds": 100.3,
+      "log": "build/matrix-logs/26.3-baseline.log",
+      "logSha256": "67ee3beeb44ea573cc1544a4743c362dc2a4503a90132c96f5083f674f789384",
+      "unitTests": {
+        "tests": 48,
+        "skipped": 1,
+        "failures": 0,
+        "errors": 0
+      },
+      "artifactSha256": "7048a1e0d01c3b721abb5794fdaa6df685365285ac0e979e8b03cca0dabb04d3"
+    },
+    {
+      "minecraft": "26.3",
+      "profile": "latest",
+      "loader": "0.19.5",
+      "fabricApi": "0.162.0+26.3",
+      "passed": true,
+      "clientVerified": true,
+      "seconds": 77.9,
+      "log": "build/matrix-logs/26.3-latest.log",
+      "logSha256": "8850b18b65c04bcc00532ae80721a58d07eaac7858b805d736f0c91588bf9f20",
+      "unitTests": {
+        "tests": 48,
+        "skipped": 1,
+        "failures": 0,
+        "errors": 0
+      },
+      "artifactSha256": "72ee1b0ede3718f06e8f4d44ed589570c58d21c46a94de5b5eefab9f45136a89"
+    }
+  ],
+  "optionalSkippedTest": "External NBS v6 fixture is optional; synthetic v6 parser tests passed."
+}

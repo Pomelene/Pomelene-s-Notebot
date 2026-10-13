@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "verifiedOn": "2026-10-13",
+  "latestLoader": "0.19.5",
+  "targets": {
+    "26.1": {
+      "adapter": "26.1",
+      "minLoader": "0.18.4",
+      "minApi": "0.144.4+26.1",
+      "latestApi": "0.145.1+26.1"
+    },
+    "26.1.1": {
+      "adapter": "26.1",
+      "minLoader": "0.18.4",
+      "minApi": "0.145.2+26.1.1",
+      "latestApi": "0.145.4+26.1.1"
+    },
+    "26.1.2": {
+      "adapter": "26.1",
+      "minLoader": "0.18.4",
+      "minApi": "0.145.4+26.1.2",
+      "latestApi": "0.155.3+26.1.2"
+    },
+    "26.2": {
+      "adapter": "26.2",
+      "minLoader": "0.19.3",
+      "minApi": "0.153.0+26.2",
+      "latestApi": "0.161.0+26.2"
+    },
+    "26.3": {
+      "adapter": "26.3",
+      "minLoader": "0.19.3",
+      "minApi": "0.161.0+26.3",
+      "latestApi": "0.162.0+26.3"
+    }
+  }
+}

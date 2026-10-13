@@ -22,7 +22,7 @@ public final class NotebotDetectionTest implements FabricClientGameTest {
     }
     @Override public void runTest(ClientGameTestContext context) {
         try(var world=context.worldBuilder().create()) {
-            var server=world.getServer();var connection=world.getConnection();connection.waitForChunksDownload();
+            var server=world.getServer();var connection=new TestConnection(context, world);connection.waitForChunksDownload();
             server.runCommand("fill -14 4 -8 14 8 8 minecraft:air");
             server.runCommand("fill -14 3 -8 14 3 8 minecraft:stone");
             server.runCommand("fill -14 4 -8 14 4 8 minecraft:dirt");
@@ -67,27 +67,27 @@ public final class NotebotDetectionTest implements FabricClientGameTest {
                 mc.options.guiScale().set(2);mc.getWindow().setWindowed(854,480);
             });
             var reload=context.computeOnClient(mc->{mc.options.languageCode="zh_cn";mc.getLanguageManager().setSelected("zh_cn");return mc.reloadResourcePacks();});
-            context.waitFor(mc->reload.isDone()&&mc.gui.overlay()==null,300);
-            context.runOnClient(mc->mc.gui.setScreen(new ReportScreen(new NotebotScreen(NotebotClient.controller()),NotebotClient.controller())));
-            context.waitTicks(5);context.runOnClient(mc->NotebotUiSmokeTest.check(mc.gui.screen()));context.takeScreenshot("detection-20-instruments-overview");
-            context.runOnClient(mc->click(mc.gui.screen(),find(mc.gui.screen(),"positions_all")));
-            context.waitTicks(3);context.runOnClient(mc->NotebotUiSmokeTest.check(mc.gui.screen()));context.takeScreenshot("detection-all-positions");
-            context.runOnClient(mc->click(mc.gui.screen(),find(mc.gui.screen(),"filter.all")));
-            context.runOnClient(mc->click(mc.gui.screen(),find(mc.gui.screen(),"filter.usable")));
+            context.waitFor(mc->reload.isDone()&&MinecraftPlatform.overlay(mc)==null,300);
+            context.runOnClient(mc->MinecraftPlatform.setScreen(mc,new ReportScreen(new NotebotScreen(NotebotClient.controller()),NotebotClient.controller())));
+            context.waitTicks(5);context.runOnClient(mc->NotebotUiSmokeTest.check(MinecraftPlatform.screen(mc)));context.takeScreenshot("detection-20-instruments-overview");
+            context.runOnClient(mc->click(MinecraftPlatform.screen(mc),find(MinecraftPlatform.screen(mc),"positions_all")));
+            context.waitTicks(3);context.runOnClient(mc->NotebotUiSmokeTest.check(MinecraftPlatform.screen(mc)));context.takeScreenshot("detection-all-positions");
+            context.runOnClient(mc->click(MinecraftPlatform.screen(mc),find(MinecraftPlatform.screen(mc),"filter.all")));
+            context.runOnClient(mc->click(MinecraftPlatform.screen(mc),find(MinecraftPlatform.screen(mc),"filter.usable")));
             context.waitTicks(3);context.takeScreenshot("detection-covered-filter");
             context.runOnClient(mc->{
-                var s=mc.gui.screen();var b=s.children().stream().filter(c->c instanceof Button w&&w.visible&&w.getY()==134).map(c->(Button)c).findFirst().orElseThrow();
-                click(s,b);check(mc.gui.screen()==null,"Locate must return to world");check(NotebotClient.controller().highlights().enabled(),"Locate must enable highlights");
+                var s=MinecraftPlatform.screen(mc);var b=s.children().stream().filter(c->c instanceof Button w&&w.visible&&w.getY()==134).map(c->(Button)c).findFirst().orElseThrow();
+                click(s,b);check(MinecraftPlatform.screen(mc)==null,"Locate must return to world");check(NotebotClient.controller().highlights().enabled(),"Locate must enable highlights");
                 mc.player.setYRot(90);mc.player.setXRot(15);
             });
             context.waitTicks(8);context.takeScreenshot("detection-world-highlight");
-            context.runOnClient(mc->{mc.getWindow().setWindowed(1200,800);mc.gui.setScreen(new ReportScreen(new NotebotScreen(NotebotClient.controller()),NotebotClient.controller()));});
-            context.waitTicks(5);context.runOnClient(mc->NotebotUiSmokeTest.check(mc.gui.screen()));context.takeScreenshot("detection-large-overview");
+            context.runOnClient(mc->{mc.getWindow().setWindowed(1200,800);MinecraftPlatform.setScreen(mc,new ReportScreen(new NotebotScreen(NotebotClient.controller()),NotebotClient.controller()));});
+            context.waitTicks(5);context.runOnClient(mc->NotebotUiSmokeTest.check(MinecraftPlatform.screen(mc)));context.takeScreenshot("detection-large-overview");
             context.runOnClient(mc->{
-                var s=mc.gui.screen();var b=s.children().stream().filter(c->c instanceof Button w&&w.visible&&w.getY()==86).map(c->(Button)c).findFirst().orElseThrow();click(s,b);
+                var s=MinecraftPlatform.screen(mc);var b=s.children().stream().filter(c->c instanceof Button w&&w.visible&&w.getY()==86).map(c->(Button)c).findFirst().orElseThrow();click(s,b);
             });
-            context.waitTicks(3);context.runOnClient(mc->NotebotUiSmokeTest.check(mc.gui.screen()));context.takeScreenshot("detection-harp-pitches");
-            context.runOnClient(mc->mc.gui.setScreen(null));
+            context.waitTicks(3);context.runOnClient(mc->NotebotUiSmokeTest.check(MinecraftPlatform.screen(mc)));context.takeScreenshot("detection-harp-pitches");
+            context.runOnClient(mc->MinecraftPlatform.setScreen(mc,null));
         }
         context.waitTicks(5);
         context.runOnClient(mc->check(!NotebotClient.controller().highlights().enabled(),"World disconnect must disable highlights"));

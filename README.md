@@ -1,6 +1,8 @@
-# Pomelene Notebot 1.2.5 — 使用说明
+# Pomelene Notebot 1.3.0 — diverse 多版本适配
 
-本版本从 Minecraft Builder 项目内的 **1.1.1 源码**重新制作，重新实现歌曲目录和主界面，并保留原版播放、兼容转换、速度、进度拖动、全音阶调音等功能。
+支持 Minecraft **26.1、26.1.1、26.1.2、26.2、26.3** 的 Fabric 客户端。歌曲解析、播放、检测和调音共用源码，每个游戏版本生成一个对应 JAR。
+
+安装时按游戏版本选择一个 JAR，并安装对应版本的 Fabric API。Loader / API 的兼容环境及验证范围见 [COMPATIBILITY.md](COMPATIBILITY.md)。
 
 ## 界面与操作
 
@@ -53,7 +55,7 @@ F8 开始/暂停/继续，F9 停止并重置。按键可以在游戏控制设置
 
 ## 安装与维护
 
-适用于 Minecraft Java **26.3**，Fabric Loader **0.19.5+**，Fabric API **0.161.0+26.3**，Java **25**。
+需要 Java **25**。26.1 系列以 Loader **0.18.4** 为兼容基线，26.2 / 26.3 以 **0.19.3** 为兼容基线；对应 Fabric API 版本见兼容表。
 退出游戏后更新 mods 内的 Notebot JAR，只保留一个启用版本。歌曲和 config/pomelene-notebot.properties 保留。
 
 构建使用 JDK 25、Gradle 9.5。主 JAR 内包含 Kuromoji/IPADIC，本机 Minecraft 提供 ICU4J；依赖遵守各自许可，项目采用 MIT 许可。
@@ -74,16 +76,19 @@ F8 开始/暂停/继续，F9 停止并重置。按键可以在游戏控制设置
 
 ## 构建与测试
 
-使用 JDK 25 和自带的 Gradle Wrapper：
+使用 JDK 25 和自带的 Gradle Wrapper，默认目标为 26.3：
 
 ```powershell
-./gradlew.bat build
-./gradlew.bat runClientGameTest -PnotebotDetectionTest
-./gradlew.bat runClientGameTest -PnotebotUiSmoke
+./gradlew.bat build '-PmcVersion=26.1.2'
+./gradlew.bat runClientGameTest '-PmcVersion=26.1.2' '-PfabricProfile=latest' '-PnotebotTestSuite=matrix'
+python tools/build_matrix.py --verify
+python tools/package_matrix.py
 ```
 
-输出位于 `build/libs/`，安装不带 `-sources` 的 JAR。检测测试在临时世界搭建全 20 音色演奏台，UI 测试运行独立客户端；不连接用户服务器。
+单版本输出在 `build/<游戏版本>/<baseline 或 latest>/libs/`。全矩阵打包输出在 `build/releases/`。安装不带 `-sources` 的 JAR，且只安装匹配当前 Minecraft 版本的一个文件。
 
-歌曲、游戏目录、构建缓存、运行日志和本机测试截图不纳入仓库。
+`baseline` 使用兼容表中的较早 Loader / API；`latest` 使用表中固定的新版本。生产代码始终按较早 API 编译，测试运行时切换依赖，以验证同一个 JAR 对两组环境的兼容性。
 
-本版验证：47 项离线测试通过，1 项可选外部曲谱测试未提供文件而跳过；独立客户端通过全 20 音色、重复音高、排除原因、筛选、定位、高亮上限和世界切换检查，原有播放、调音及允许 64 格交互的测试服务器回归通过。
+客户端测试使用临时世界，检查播放、自动调音、64 格半径、全 20 音色、排除原因、筛选、定位和高亮。`-PnotebotTestSuite=ui` 可单独检查目录、搜索和设置界面。
+
+歌曲、游戏目录、构建缓存、运行日志和本机截图不纳入仓库。

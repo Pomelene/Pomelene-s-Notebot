@@ -21,6 +21,6 @@ public final class PreferenceScreen extends Screen {
     @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){
         super.extractRenderState(g,mx,my,delta);g.centeredText(font,title,width/2,14,0xFFFFFFFF);
     }
-    @Override public void onClose(){minecraft.gui.setScreen(parent);}
+    @Override public void onClose(){MinecraftPlatform.setScreen(minecraft,parent);}
     @Override public boolean isPauseScreen(){return false;}
 }

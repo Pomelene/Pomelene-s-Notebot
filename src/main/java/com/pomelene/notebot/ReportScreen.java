@@ -69,7 +69,7 @@ public final class ReportScreen extends Screen {
         List<Row> result=new ArrayList<>();
         if(controller.plan()!=null) for(String problem:controller.plan().problems()) {
             String[] parts=problem.split(":",2);Component label=text("problem."+parts[0],parts[1]);
-            result.add(new Row(label,label,()->minecraft.gui.setScreen(new CompatibilityScreen(this,controller))));
+            result.add(new Row(label,label,()->MinecraftPlatform.setScreen(minecraft,new CompatibilityScreen(this,controller))));
         }
         for(int index=0;index<NoteKey.NAMES.length;index++) {
             int instrument=index;var summary=report.instrument(index);
@@ -86,7 +86,7 @@ public final class ReportScreen extends Screen {
     }
     private void locate(BlockPos pos) {
         controller.highlights().locate(minecraft,pos);
-        minecraft.gui.setScreen(null);
+        MinecraftPlatform.setScreen(minecraft,null);
         if(minecraft.player!=null)minecraft.player.sendSystemMessage(text("highlight_position",pos.getX(),pos.getY(),pos.getZ()));
     }
     private boolean instrumentMatches(int index) { return selected==-1 || (selected==-3?index<0:selected==index); }
@@ -146,5 +146,5 @@ public final class ReportScreen extends Screen {
         g.centeredText(font,(page+1)+" / "+pages,width/2,height-48,0xFFAAAAAA);
     }
     @Override public boolean isPauseScreen(){return false;}
-    @Override public void onClose(){minecraft.gui.setScreen(parent);}
+    @Override public void onClose(){MinecraftPlatform.setScreen(minecraft,parent);}
 }

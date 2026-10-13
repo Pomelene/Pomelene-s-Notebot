@@ -40,7 +40,7 @@ public final class CompatibilityScreen extends Screen {
             .bounds(left,54,panelWidth*3/5-3,20).build());
         smart.active=!analyzing&&!ids.isEmpty();
         Button preference=addRenderableWidget(Button.builder(NotebotController.text("smart_preference",
-                NotebotController.text("smart_preference_"+controller.assignmentPreference().key())),b -> minecraft.gui.setScreen(new PreferenceScreen(this)))
+                NotebotController.text("smart_preference_"+controller.assignmentPreference().key())),b -> MinecraftPlatform.setScreen(minecraft,new PreferenceScreen(this)))
                 .bounds(left+panelWidth*3/5+1,54,panelWidth*2/5-1,20).build());
         preference.active=!analyzing;
         preference.setTooltip(Tooltip.create(NotebotController.text("smart_preference_tip")));
@@ -66,7 +66,7 @@ public final class CompatibilityScreen extends Screen {
         }).bounds(left,y+48,panelWidth,20).build());
         apply=addRenderableWidget(Button.builder(NotebotController.text("compat_apply"),b -> {
             controller.applyCompatibility(new CompatibilityOptions(bindings,detuned?policy:CompatibilityOptions.Detune.REJECT),fold);
-            minecraft.gui.setScreen(parent);
+            MinecraftPlatform.setScreen(minecraft,parent);
         }).bounds(left,height-44,panelWidth/2-2,20).build());
         addRenderableWidget(Button.builder(NotebotController.text("compat_cancel"),b -> onClose())
             .bounds(left+panelWidth/2+2,height-44,panelWidth/2-2,20).build());
@@ -89,13 +89,13 @@ public final class CompatibilityScreen extends Screen {
                 analysisMessage=NotebotController.text("smart_summary",NotebotController.text("smart_style_"+result.style()),
                     NotebotController.text("smart_complexity_"+result.complexity()));
             }
-            if(client.gui.screen()==this)rebuildWidgets();
+            if(MinecraftPlatform.screen(client)==this)rebuildWidgets();
         }));
     }
     public void choosePreference(SmartAssignment.Preference preference){
         controller.setAssignmentPreference(preference);suggestions=Map.of();
         bindings.keySet().removeIf(id -> !manual.contains(id));
-        minecraft.gui.setScreen(this);analyze();
+        MinecraftPlatform.setScreen(minecraft,this);analyze();
     }
     private Component explanation(int id) {
         var suggestion=suggestions.get(id);
@@ -121,6 +121,6 @@ public final class CompatibilityScreen extends Screen {
         g.textWithWordWrap(font,NotebotController.text("compat_hint",page+1,Math.max(1,(ids.size()+rows-1)/rows)),left,30,panelWidth,0xFFFFDD88);
         g.text(font,font.plainSubstrByWidth(analysisMessage.getString(),panelWidth),left,79,0xFF88DDCC);
     }
-    @Override public void onClose() { closed=true;++analysisRequest;minecraft.gui.setScreen(parent); }
+    @Override public void onClose() { closed=true;++analysisRequest;MinecraftPlatform.setScreen(minecraft,parent); }
     @Override public boolean isPauseScreen() { return false; }
 }

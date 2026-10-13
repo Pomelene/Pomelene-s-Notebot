@@ -198,7 +198,7 @@ public final class NotebotController {
                 song = loaded.song(); repeat = song.loop(); plan = loaded.plan();
                 state = State.READY; clock.reset(); scan();
                 status = text(plan.playable() ? "loaded" : "unsupported_song", song.name());
-                if (!plan.playable()) client.gui.setScreen(new CompatibilityScreen(client.gui.screen(),this));
+                if (!plan.playable()) MinecraftPlatform.setScreen(client,new CompatibilityScreen(MinecraftPlatform.screen(client),this));
             }
         }));
     }
@@ -344,7 +344,7 @@ public final class NotebotController {
             say("need_empty_hand"); return;
         }
         if (client.isPaused()) return;
-        var screen = client.gui.screen();
+        var screen = MinecraftPlatform.screen(client);
         if (!directPackets && (!client.isWindowActive()
                 || (screen != null && !(screen instanceof NotebotScreen) && !(screen instanceof ReportScreen)
                     && !(screen instanceof FolderScreen) && !(screen instanceof SpeedScreen)))) {

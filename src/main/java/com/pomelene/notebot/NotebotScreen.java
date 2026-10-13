@@ -49,7 +49,7 @@ public final class NotebotScreen extends Screen {
         int gap=4,cell=(libraryWidth-8)/3;
         up=button("parent_folder",left,48,cell,()->navigate(controller.library().snapshot().directory().getParent()));
         button("library_root",left+cell+gap,48,cell,()->navigate(controller.library().root()));
-        button("new_folder",left+2*(cell+gap),48,libraryWidth-2*(cell+gap),()->minecraft.gui.setScreen(new FolderScreen(this,controller)));
+        button("new_folder",left+2*(cell+gap),48,libraryWidth-2*(cell+gap),()->MinecraftPlatform.setScreen(minecraft,new FolderScreen(this,controller)));
         openFolder=button("open_folder",left,72,cell,controller::openFolder);
         openFolder.setTooltip(Tooltip.create(text("folder_open_tip")));
         button("copy_folder_path",left+cell+gap,72,cell,controller::copyFolderPath);
@@ -66,7 +66,7 @@ public final class NotebotScreen extends Screen {
                 if(view.loading()||selected>=view.entries().size())return;
                 var entry=view.entries().get(selected);
                 if(entry.folder())navigate(entry.path());
-                else {controller.load(entry.path());if(minecraft.gui.screen()==this)selectTab(Tab.PLAYBACK);}
+                else {controller.load(entry.path());if(MinecraftPlatform.screen(minecraft)==this)selectTab(Tab.PLAYBACK);}
             }).bounds(left,120+slot*22,libraryWidth,20).build()));
         }
         previous=button("previous",left,height-53,60,()->{page--;displayed=null;});
@@ -85,9 +85,9 @@ public final class NotebotScreen extends Screen {
         tune=button("tune",rightLeft+half+4,136,half,controller::tune);tune.setTooltip(Tooltip.create(text("tune_tip")));
         fullTune=button("compact_full_scale",rightLeft,160,half,controller::tuneFullScale);
         fullTune.setTooltip(Tooltip.create(text("full_scale_tip")));
-        button("details",rightLeft+half+4,160,half,()->minecraft.gui.setScreen(new ReportScreen(this,controller)));
-        button("compact_speed",rightLeft,184,half,()->minecraft.gui.setScreen(new SpeedScreen(this,controller)));
-        compatibility=button("compact_compat",rightLeft+half+4,184,half,()->minecraft.gui.setScreen(new CompatibilityScreen(this,controller)));
+        button("details",rightLeft+half+4,160,half,()->MinecraftPlatform.setScreen(minecraft,new ReportScreen(this,controller)));
+        button("compact_speed",rightLeft,184,half,()->MinecraftPlatform.setScreen(minecraft,new SpeedScreen(this,controller)));
+        compatibility=button("compact_compat",rightLeft+half+4,184,half,()->MinecraftPlatform.setScreen(minecraft,new CompatibilityScreen(this,controller)));
     }
     private boolean radiusEditable(){var s=controller.state();return s!=NotebotController.State.LOADING&&s!=NotebotController.State.TUNING&&s!=NotebotController.State.PLAYING;}
     private void initSettings(){
@@ -98,7 +98,7 @@ public final class NotebotScreen extends Screen {
         loop=button("compact_loop_off",rightLeft+half+4,154,half,controller::toggleRepeat);
         direct=button("compact_direct_off",rightLeft,178,half,controller::toggleDirectPackets);
         direct.setTooltip(Tooltip.create(text("direct_packets_tip")));
-        button("compact_speed",rightLeft+half+4,178,half,()->minecraft.gui.setScreen(new SpeedScreen(this,controller)));
+        button("compact_speed",rightLeft+half+4,178,half,()->MinecraftPlatform.setScreen(minecraft,new SpeedScreen(this,controller)));
     }
     private static String number(double n){return java.math.BigDecimal.valueOf(n).setScale(4,java.math.RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();}
     private final class NumericSetting{
@@ -189,6 +189,6 @@ public final class NotebotScreen extends Screen {
         }
     }
     @Override public boolean isPauseScreen(){return false;}
-    @Override public void onClose(){commitEdits();minecraft.gui.setScreen(null);}
+    @Override public void onClose(){commitEdits();MinecraftPlatform.setScreen(minecraft,null);}
     @Override public void onFilesDrop(List<Path> paths){controller.importFiles(paths);}
 }

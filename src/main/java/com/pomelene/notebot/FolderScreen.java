@@ -16,7 +16,7 @@ public final class FolderScreen extends Screen {
         int x=width/2-120, y=height/2-20;
         EditBox name=addRenderableWidget(new EditBox(font,x,y,240,20,title)); name.setMaxLength(100);
         Button create=addRenderableWidget(Button.builder(NotebotController.text("create_folder"),b -> {
-            if(controller.createFolder(name.getValue().strip()))minecraft.gui.setScreen(parent);
+            if(controller.createFolder(name.getValue().strip()))MinecraftPlatform.setScreen(minecraft,parent);
             else error=controller.status();
         }).bounds(x,y+28,118,20).build()); create.active=false;
         name.setResponder(value -> create.active=!value.isBlank());
@@ -27,6 +27,6 @@ public final class FolderScreen extends Screen {
         super.extractRenderState(g,mx,my,delta); g.centeredText(font,title,width/2,height/2-45,0xFFFFFFFF);
         g.textWithWordWrap(font,error,width/2-120,height/2+36,240,0xFFFF7777);
     }
-    @Override public void onClose() { minecraft.gui.setScreen(parent); }
+    @Override public void onClose() { MinecraftPlatform.setScreen(minecraft,parent); }
     @Override public boolean isPauseScreen() { return false; }
 }

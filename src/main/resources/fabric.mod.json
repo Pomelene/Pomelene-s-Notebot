@@ -10,9 +10,9 @@
   "entrypoints": { "client": ["com.pomelene.notebot.NotebotClient"] },
   "mixins": ["pomelene_notebot.mixins.json"],
   "depends": {
-    "fabricloader": ">=0.19.5",
-    "minecraft": "26.3",
+    "fabricloader": ">=${minLoader}",
+    "minecraft": "${minecraft}",
     "java": ">=25",
-    "fabric-api": ">=0.161.0"
+    "fabric-api": ">=${minApi}"
   }
 }
