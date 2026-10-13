@@ -2,7 +2,7 @@
 
 支持 Minecraft **26.1、26.1.1、26.1.2、26.2、26.3** 的 Fabric 客户端。歌曲解析、播放、检测和调音共用源码，每个游戏版本生成一个对应 JAR。
 
-安装时按游戏版本选择一个 JAR，并安装对应版本的 Fabric API。Loader / API 的兼容环境及验证范围见 [COMPATIBILITY.md](COMPATIBILITY.md)。
+安装时按游戏版本选择一个 JAR，并安装对应版本的 Fabric API；具体依赖版本保存在 `compatibility.json`。
 
 ## 界面与操作
 
@@ -81,14 +81,15 @@ F8 开始/暂停/继续，F9 停止并重置。按键可以在游戏控制设置
 ```powershell
 ./gradlew.bat build '-PmcVersion=26.1.2'
 ./gradlew.bat runClientGameTest '-PmcVersion=26.1.2' '-PfabricProfile=latest' '-PnotebotTestSuite=matrix'
-python tools/build_matrix.py --verify
-python tools/package_matrix.py
 ```
 
-单版本输出在 `build/<游戏版本>/<baseline 或 latest>/libs/`。全矩阵打包输出在 `build/releases/`。安装不带 `-sources` 的 JAR，且只安装匹配当前 Minecraft 版本的一个文件。
+输出在 `build/<游戏版本>/<baseline 或 latest>/libs/`。安装不带 `-sources` 的 JAR，且只安装匹配当前 Minecraft 版本的一个文件。
 
 `baseline` 使用兼容表中的较早 Loader / API；`latest` 使用表中固定的新版本。生产代码始终按较早 API 编译，测试运行时切换依赖，以验证同一个 JAR 对两组环境的兼容性。
 
 客户端测试使用临时世界，检查播放、自动调音、64 格半径、全 20 音色、排除原因、筛选、定位和高亮。`-PnotebotTestSuite=ui` 可单独检查目录、搜索和设置界面。
 
 歌曲、游戏目录、构建缓存、运行日志和本机截图不纳入仓库。
+
+本分支保留多版本模组源码、测试源码和构建必需文件，适配 26.1、26.1.1、26.1.2、26.2、26.3。
+上述游戏版本在较早和较新 Fabric 环境中的 10 组客户端测试均通过，每组 47 项单元测试通过，1 项可选外部曲谱测试跳过。
