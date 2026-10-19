@@ -112,7 +112,7 @@
   "notebot.speed_custom": "Tempo: custom",
   "notebot.custom_tempo": "Custom NBS ticks per second",
   "notebot.speed_apply": "Save custom tempo",
-  "notebot.speed_hint": "Mode and tempo persist for subsequent songs. Enter 0.1–200 NBS ticks/sec, not BPM or tuning packets/sec. Tempo changes preserve song position.",
+  "notebot.speed_hint": "Original mode follows tempo events. Custom tempo scales the entire tempo map relative to the file header tempo. Enter 0.1–200 NBS ticks/sec, not BPM or tuning packets/sec. Musical position is preserved.",
   "notebot.smart_assign": "Smart assignment (keep manual choices)",
   "notebot.smart_working": "Analyzing the complete score…",
   "notebot.smart_failed": "Analysis failed. Retry or choose manually.",

@@ -80,15 +80,13 @@ public final class NbsReader {
                 // Keep their declared optional metadata layout, and recover note-only layers.
                 actualLayers = Math.max(actualLayers, layer + 1);
                 int instrument = u8(), key = u8();
-                if (key > 87) throw new IOException("Invalid NBS key: " + key);
-                int velocity = 100, cents = 0;
+                int velocity = 100, cents = 0, pan = 100;
                 if (version >= 4) {
                     velocity = u8();
-                    int pan = u8();
+                    pan = u8();
                     cents = data.getShort();
-                    if (velocity > 100 || pan > 200) throw new IOException("Invalid note volume/panning");
                 }
-                notes.add(new NbsSong.Note(tick, layer, instrument, key, velocity, cents));
+                notes.add(new NbsSong.Note(tick, layer, instrument, key, velocity, cents, pan));
                 if (notes.size() > 2_000_000) throw new IOException("Too many notes");
                 lastTick = tick;
             }
@@ -97,12 +95,13 @@ public final class NbsReader {
         java.util.Map<Integer,String> layerNames = new java.util.TreeMap<>(), soundFiles = new java.util.TreeMap<>();
         java.util.Map<Integer,Integer> layerVolumes = new java.util.TreeMap<>(), baseKeys = new java.util.TreeMap<>();
         int[] volume = new int[Math.max(layers, actualLayers)];
+        int[] layerStatus = new int[volume.length];
         java.util.Arrays.fill(volume, 100);
         boolean countedNames = version == 0 && tryCountedLayerNames(actualLayers);
         if (!countedNames && data.hasRemaining()) {
             for (int i = 0; i < layers; i++) {
                 layerNames.put(i,string());
-                if (version >= 4) u8(); // Lock is an editor flag, not a mute flag.
+                if (version >= 4) layerStatus[i] = u8(); // 1 is locked; 2 is solo.
                 volume[i] = u8(); layerVolumes.put(i,volume[i]);
                 if (volume[i] > 100) throw new IOException("Invalid layer volume");
                 if (version >= 2 && u8() > 200) throw new IOException("Invalid layer panning");
@@ -121,15 +120,26 @@ public final class NbsReader {
             while (data.hasRemaining()) if (u8() != 0) throw new IOException("Unexpected trailing NBS data");
         }
         List<NbsSong.Note> audible = new ArrayList<>();
+        List<NbsControlEvent> events = new ArrayList<>();
+        boolean solo = java.util.Arrays.stream(layerStatus).anyMatch(status -> status == 2);
         for (var note : notes) {
-            if (note.velocity() > 0 && volume[note.layer()] > 0) audible.add(note);
+            var type = note.instrument() >= vanilla ? NbsControlEvent.classify(version,customNames.get(note.instrument())) : null;
+            if (type != null) {
+                // Markers are often placed on silent layers. Their fields encode parameters,
+                // not musical pitch, volume or panning; solo/mute does not disable them.
+                events.add(new NbsControlEvent(type,customNames.get(note.instrument()),note));
+                continue;
+            }
+            if (note.key() > 87) throw new IOException("Invalid NBS key: " + note.key());
+            if (note.velocity() > 100 || note.panning() > 200) throw new IOException("Invalid note volume/panning");
+            if (note.velocity() > 0 && volume[note.layer()] > 0 && (!solo || layerStatus[note.layer()] == 2)) audible.add(note);
         }
         length = Math.max(length, lastTick + 1);
         if (length == 0 || audible.isEmpty()) throw new IOException("Song contains no audible notes");
         if (loop && loopStart >= length) throw new IOException("Loop start is outside song");
         return new NbsSong(name.isBlank() ? fallbackName : name,
                 author.isBlank() ? originalAuthor : author, version, vanilla, tempo,
-                length, loop, maxLoops, loopStart, audible, customNames, new NbsSong.Metadata(layerNames,layerVolumes,soundFiles,baseKeys));
+                length, loop, maxLoops, loopStart, audible, customNames, new NbsSong.Metadata(layerNames,layerVolumes,soundFiles,baseKeys), events);
     }
     private int u8() { return Byte.toUnsignedInt(data.get()); }
     private int u16() { return Short.toUnsignedInt(data.getShort()); }

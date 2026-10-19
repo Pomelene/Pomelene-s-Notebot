@@ -5,7 +5,7 @@ import java.util.*;
 
 /** Quantize to the server's 20 ticks/second; identical chord notes are deduplicated. */
 public record PlaybackPlan(NavigableMap<Integer, List<NoteKey>> frames, Set<NoteKey> required,
-                           int duration, int loopStart, List<String> problems, int foldedNotes) {
+                           int duration, int loopStart, List<String> problems, int foldedNotes, SongTimeline timeline) {
     public PlaybackPlan {
         frames = Collections.unmodifiableNavigableMap(new TreeMap<>(frames));
         required = Collections.unmodifiableSet(new TreeSet<>(required));
@@ -17,8 +17,7 @@ public record PlaybackPlan(NavigableMap<Integer, List<NoteKey>> frames, Set<Note
         return compile(song, foldOctaves, CompatibilityOptions.STRICT, song.tempo());
     }
     public static PlaybackPlan compile(NbsSong song, boolean foldOctaves, CompatibilityOptions options, double tempo) {
-        if (!Double.isFinite(tempo) || tempo <= 0 || song.length() * 20.0 / tempo >= Integer.MAX_VALUE - 1)
-            throw new IllegalArgumentException("Invalid or excessive playback duration");
+        var timeline = new SongTimeline(song,tempo);
         var grouped = new TreeMap<Integer, Set<NoteKey>>();
         var required = new TreeSet<NoteKey>();
         var problems = new LinkedHashSet<String>();
@@ -48,7 +47,7 @@ public record PlaybackPlan(NavigableMap<Integer, List<NoteKey>> frames, Set<Note
             }
             NoteKey key = new NoteKey(instrument, pitch);
             required.add(key);
-            int gameTick = quantize(note.tick(), tempo);
+            int gameTick = timeline.quantize(note.tick());
             grouped.computeIfAbsent(gameTick, ignored -> new TreeSet<>()).add(key);
         }
         var frames = new TreeMap<Integer, List<NoteKey>>();
@@ -56,12 +55,9 @@ public record PlaybackPlan(NavigableMap<Integer, List<NoteKey>> frames, Set<Note
             if (keys.size() > 64) problems.add("dense:" + tick);
             frames.put(tick, List.copyOf(keys));
         });
-        int duration = Math.max(1, (int) Math.ceil(song.length() * 20.0 / tempo));
+        int duration = Math.max(1, (int) Math.ceil(timeline.gameTick(song.length())));
         if (!frames.isEmpty()) duration = Math.max(duration, frames.lastKey() + 1);
         return new PlaybackPlan(frames, required, duration,
-                song.loop() ? quantize(song.loopStart(), tempo) : 0, new ArrayList<>(problems), folded);
-    }
-    private static int quantize(int tick, double tempo) {
-        return (int) Math.round(tick * 20.0 / tempo);
+                song.loop() ? timeline.quantize(song.loopStart()) : 0, new ArrayList<>(problems), folded, timeline);
     }
 }

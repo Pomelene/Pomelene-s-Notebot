@@ -112,7 +112,7 @@
   "notebot.speed_custom": "播放速度：使用自定义速度",
   "notebot.custom_tempo": "自定义速度（NBS刻/秒）",
   "notebot.speed_apply": "保存自定义速度",
-  "notebot.speed_hint": "此模式与自定义速度常驻保存，适用于后续曲目。输入0.1–200 NBS刻/秒（不是BPM，也不是调音发包速度）。改变速度保留曲目位置。",
+  "notebot.speed_hint": "原速模式跟随文件中的变速事件；自定义速度按文件头速度的比例缩放整首曲目。输入0.1–200 NBS刻/秒（不是BPM或调音发包速度）。改变速度保留音乐位置。",
   "notebot.smart_assign": "智能分配（保留手动选择）",
   "notebot.smart_working": "正在分析整曲…",
   "notebot.smart_failed": "分析未完成，请手动分配或重试。",

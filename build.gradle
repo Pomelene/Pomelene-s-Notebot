@@ -81,5 +81,15 @@ if(project.hasProperty('notebotDetectionTest')) {
 
 // Test entrypoint changes are resource inputs, so switching suites invalidates cached resources.
 tasks.withType(ProcessResources).configureEach {
-    inputs.property 'notebotTestMode', project.hasProperty('notebotDetectionTest') ? 'detection' : project.hasProperty('notebotUiSmoke') ? 'ui' : 'gameplay'
+    inputs.property 'notebotTestMode', project.hasProperty('notebotControlEventsTest') ? 'controls' : project.hasProperty('notebotDetectionTest') ? 'detection' : project.hasProperty('notebotUiSmoke') ? 'ui' : 'gameplay'
+}
+
+if(project.hasProperty('notebotControlEventsTest')) {
+    tasks.withType(ProcessResources).configureEach {
+        if(name=='processGametestResources') {
+            filesMatching('fabric.mod.json') {
+                filter { line -> line.replace('com.pomelene.notebot.NotebotGameTest','com.pomelene.notebot.NotebotControlEventsTest') }
+            }
+        }
+    }
 }

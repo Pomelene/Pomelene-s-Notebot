@@ -5,8 +5,14 @@ import java.util.List;
 
 public record NbsSong(String name, String author, int version, int vanillaInstruments,
                       double tempo, int length, boolean loop, int maxLoops, int loopStart,
-                      List<Note> notes, java.util.Map<Integer, String> customInstruments, Metadata metadata) {
-    public NbsSong { notes = List.copyOf(notes); customInstruments = java.util.Map.copyOf(customInstruments); }
+                      List<Note> notes, java.util.Map<Integer, String> customInstruments, Metadata metadata,
+                      List<NbsControlEvent> events) {
+    public NbsSong { notes = List.copyOf(notes); customInstruments = java.util.Map.copyOf(customInstruments); events = List.copyOf(events); }
+    public NbsSong(String name, String author, int version, int vanillaInstruments, double tempo,
+                   int length, boolean loop, int maxLoops, int loopStart, List<Note> notes,
+                   java.util.Map<Integer,String> customInstruments, Metadata metadata) {
+        this(name,author,version,vanillaInstruments,tempo,length,loop,maxLoops,loopStart,notes,customInstruments,metadata,List.of());
+    }
     /** Header count matters: old custom IDs 16-19 must never silently become copper instruments. */
     public boolean isVanillaInstrument(int instrument) {
         int supported = version >= 6 ? NoteKey.NAMES.length : 16;
@@ -26,5 +32,9 @@ public record NbsSong(String name, String author, int version, int vanillaInstru
                    int length, boolean loop, int maxLoops, int loopStart, List<Note> notes) {
         this(name, author, version, vanillaInstruments, tempo, length, loop, maxLoops, loopStart, notes, java.util.Map.of(), Metadata.EMPTY);
     }
-    public record Note(int tick, int layer, int instrument, int key, int velocity, int cents) {}
+    public record Note(int tick, int layer, int instrument, int key, int velocity, int cents, int panning) {
+        public Note(int tick, int layer, int instrument, int key, int velocity, int cents) {
+            this(tick,layer,instrument,key,velocity,cents,100);
+        }
+    }
 }
