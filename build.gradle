@@ -11,7 +11,7 @@ if (!(profile in ['baseline', 'latest'])) throw new GradleException('fabricProfi
 def runtimeLoader = providers.gradleProperty('loaderVersion').getOrElse(profile == 'latest' ? compatibility.latestLoader : target.minLoader)
 def runtimeApi = providers.gradleProperty('fabricApiVersion').getOrElse(profile == 'latest' ? target.latestApi : target.minApi)
 def testMode = providers.gradleProperty('notebotTestSuite').getOrElse(project.hasProperty('notebotDetectionTest') ? 'detection' : project.hasProperty('notebotUiSmoke') ? 'ui' : 'gameplay')
-def testClasses = [gameplay: 'NotebotGameTest', detection: 'NotebotDetectionTest', ui: 'NotebotUiSmokeTest', matrix: 'NotebotMatrixTest']
+def testClasses = [gameplay: 'NotebotGameTest', detection: 'NotebotDetectionTest', ui: 'NotebotUiSmokeTest', matrix: 'NotebotMatrixTest', controls: 'NotebotControlEventsTest']
 if (!testClasses.containsKey(testMode)) throw new GradleException("Unknown test suite: ${testMode}")
 
 version = "${project.mod_version}+${targetMinecraft}"

@@ -154,7 +154,8 @@ public final class NotebotController {
     }
     private void recompile() {
         if (song == null) return;
-        double position = progress(); boolean resume = state == State.PLAYING;
+        double position = plan == null ? 0 : plan.timeline().sourceTick(clock.tick());
+        boolean resume = state == State.PLAYING;
         stop(false); int id = ++loadId; state = State.LOADING;
         NbsSong source = song; boolean fold = foldOctaves;
         CompatibilityOptions options = compatibility;
@@ -163,7 +164,7 @@ public final class NotebotController {
             .whenComplete((compiled,error) -> client.execute(() -> {
                 if (id != loadId) return;
                 if (error != null) { plan = null; state = State.READY; status = text("load_error",error.getMessage()); return; }
-                plan = compiled; clock.seek(plan,(int)Math.round(position*(plan.duration()-1)));
+                plan = compiled; clock.seek(plan,plan.timeline().quantize(position));
                 state = State.PAUSED; scan(); status = text(plan.playable()?"loaded":"unsupported_song",song.name());
                 if (resume && plan.playable()) togglePlayback();
             }));

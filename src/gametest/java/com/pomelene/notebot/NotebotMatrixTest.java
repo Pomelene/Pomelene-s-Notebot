@@ -9,6 +9,7 @@ public final class NotebotMatrixTest implements FabricClientGameTest {
         new NotebotGameTest().runTest(context);
         context.runOnClient(mc -> NotebotClient.controller().stop(false));
         new NotebotDetectionTest().runTest(context);
+        new NotebotControlEventsTest().runTest(context);
         System.out.println("NOTEBOT_MATRIX_OK");
     }
 }
